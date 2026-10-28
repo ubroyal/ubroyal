@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UBROYAL - 3D Next-Gen Sneaker Vault</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        vault: {
+                            50: '#fffbeb',
+                            100: '#fef3c7',
+                            500: '#f59e0b',
+                            600: '#d97706',
+                            700: '#b45309',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            perspective: 1200px;
+            overflow-x: hidden;
+        }
+
+        /* Glassmorphism utility */
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+        }
+        .dark .glass-nav {
+            background: rgba(7, 8, 12, 0.88);
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .dark .glass-card {
+            background: rgba(13, 15, 23, 0.75);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 9999px;
+        }
+        .dark ::webkit-scrollbar-thumb {
+            background: #f59e0b;
+        }
+
+        /* Animations */
+        @keyframes floating {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-12px) rotate(2deg); }
+        }
+        .animate-float {
+            animation: floating 4s ease-in-out infinite;
+        }
+
+        @keyframes rotate3d {
+            from { transform: rotateY(0deg) rotateX(10deg); }
+            to { transform: rotateY(360deg) rotateX(10deg); }
+        }
+        .rotate-3d-continuous {
+            animation: rotate3d 18s linear infinite;
+            transform-style: preserve-3d;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-[#07080c] text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-300">
+
+    <!-- WhatsApp Floating Support Badge -->
+    <a href="https://wa.me/917061219477?text=Hello%20UBROYAL%20Team,%20I%20need%20help%20regarding%20a%20sneaker." 
+       target="_blank" 
+       title="Need Help? Chat on WhatsApp"
+       class="fixed bottom-6 right-6 z-50 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black px-4 py-3 rounded-full shadow-2xl flex items-center justify-center gap-2.5 hover:scale-105 transition-all text-xs border border-emerald-400/50">
+        <i class="fa-brands fa-whatsapp text-xl text-slate-950"></i>
+        <span>Need Help? Chat</span>
+    </a>
+
+    <!-- Sticky Glass Navigation Header -->
+    <nav class="sticky top-0 z-40 glass-nav border-b border-slate-200 dark:border-amber-500/20 transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+            
+            <!-- Logo & Location -->
+            <div class="flex items-center gap-6">
+                <a href="#" class="flex items-center gap-2 group">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-amber-500 via-amber-400 to-purple-600 flex items-center justify-center text-slate-950 text-xl font-black shadow-lg shadow-amber-500/30 group-hover:scale-105 transition-transform duration-300">
+                        U
+                    </div>
+                    <span class="text-2xl font-black tracking-tight italic bg-gradient-to-r from-amber-400 via-amber-500 to-purple-500 bg-clip-text text-transparent">
+                        UBROYAL
+                    </span>
+                </a>
+            </div>
+
+            <!-- Global Live Search Bar -->
+            <div class="flex-1 max-w-md hidden sm:block relative">
+                <div class="relative flex items-center">
+                    <i class="fa-solid fa-magnifying-glass absolute left-4 text-amber-500"></i>
+                    <input type="text" id="searchInput" oninput="handleSearch(this.value)" placeholder="Search sneakers by title or category..." 
+                           class="w-full pl-11 pr-4 py-2.5 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-amber-500/30 focus:outline-none focus:ring-2 focus:ring-amber-500/50 text-sm transition-all duration-200">
+                </div>
+            </div>
+
+            <!-- Right Controls -->
+            <div class="flex items-center gap-3">
+                <!-- Theme Toggle Button -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-amber-500/30 flex items-center justify-center text-slate-600 dark:text-amber-400 hover:scale-105 transition-all">
+                    <i class="fa-solid fa-moon dark:hidden"></i>
+                    <i class="fa-solid fa-sun hidden dark:block"></i>
+                </button>
+
+                <!-- Cart Button with Counter -->
+                <button onclick="toggleCartDrawer()" class="relative bg-gradient-to-r from-amber-500 via-amber-600 to-purple-600 text-slate-950 font-bold px-5 py-2.5 rounded-full flex items-center gap-3 shadow-lg shadow-amber-500/30 hover:shadow-amber-500/50 transition-all duration-300 hover:scale-105 active:scale-95">
+                    <i class="fa-solid fa-bag-shopping text-lg"></i>
+                    <span class="hidden sm:inline">Bag</span>
+                    <span id="cartCountBadge" class="bg-slate-950 text-amber-400 font-extrabold text-xs px-2 py-0.5 rounded-full shadow-inner">0</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Interactive 3D Hero Header Banner -->
+    <header class="relative overflow-hidden pt-8 pb-16 md:py-20 bg-gradient-to-b from-amber-500/10 via-transparent to-transparent">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+                
+                <!-- Left Content Info -->
+                <div class="lg:col-span-7 space-y-6 text-center lg:text-left">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-500 font-semibold text-xs sm:text-sm shadow-sm">
+                        <i class="fa-solid fa-crown text-amber-500 animate-pulse"></i> Exclusive 3D Sneaker Vault Platform
+                    </div>
+                    <h1 class="text-4xl sm:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-none">
+                        ELEVATE YOUR STEP WITH <br class="hidden sm:block"/>
+                        <span class="bg-gradient-to-r from-amber-400 via-amber-500 to-purple-500 bg-clip-text text-transparent">
+                            PREMIUM SNEAKERS
+                        </span>
+                    </h1>
+                    <p class="text-slate-600 dark:text-slate-400 text-base sm:text-lg max-w-xl mx-auto lg:mx-0">
+                        Explore hand-crafted high-tops, retro classics, and basketball editions with immersive 3D visual effects and fast all-India express delivery.
+                    </p>
+
+                    <!-- Mobile Search Input -->
+                    <div class="sm:hidden relative mt-4">
+                        <i class="fa-solid fa-magnifying-glass absolute left-4 top-3.5 text-amber-500"></i>
+                        <input type="text" id="mobileSearchInput" oninput="handleSearch(this.value)" placeholder="Search sneakers..." 
+                               class="w-full pl-11 pr-4 py-3 rounded-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-amber-500/30 focus:outline-none focus:ring-2 focus:ring-amber-500 shadow-md text-sm">
+                    </div>
+
+                    <!-- Highlight Metrics -->
+                    <div class="pt-4 grid grid-cols-3 gap-4 max-w-md mx-auto lg:mx-0 border-t border-slate-200 dark:border-slate-800">
+                        <div>
+                            <span class="text-2xl sm:text-3xl font-black text-amber-500">100%</span>
+                            <p class="text-xs text-slate-500 font-medium">Authentic Vault</p>
+                        </div>
+                        <div>
+                            <span class="text-2xl sm:text-3xl font-black text-purple-500">4.9 ★</span>
+                            <p class="text-xs text-slate-500 font-medium">Top Rated</p>
+                        </div>
+                        <div>
+                            <span class="text-2xl sm:text-3xl font-black text-emerald-500">₹0</span>
+                            <p class="text-xs text-slate-500 font-medium">Free Delivery</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Interactive 3D Rotating Floating Card Presentation -->
+                <div class="lg:col-span-5 flex justify-center items-center relative">
+                    <div class="w-72 h-72 sm:w-96 sm:h-96 relative flex items-center justify-center">
+                        <!-- Glow Ring -->
+                        <div class="absolute inset-0 bg-gradient-to-tr from-amber-500 to-purple-600 rounded-full blur-3xl opacity-30 dark:opacity-40 animate-pulse"></div>
+
+                        <!-- Main Floating Card -->
+                        <div class="relative w-full h-full flex items-center justify-center animate-float">
+                            <div class="w-64 h-64 sm:w-80 sm:h-80 rounded-3xl glass-card p-6 shadow-2xl flex flex-col items-center justify-between text-center relative overflow-hidden group">
+                                <div class="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-purple-600 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full shadow-lg">
+                                    CROWN GRAIL
+                                </div>
+                                <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80" 
+                                     alt="Hero Sneaker" 
+                                     class="w-44 h-44 sm:w-52 sm:h-52 object-contain rounded-2xl shadow-xl transition-transform duration-500 group-hover:scale-110">
+                                <div>
+                                    <h3 class="font-extrabold text-slate-900 dark:text-white text-base">UBROYAL Crimson OG</h3>
+                                    <p class="text-xs text-amber-500 font-bold mt-1">₹14,999 • Genuine Leather</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Floating Badges -->
+                        <div class="absolute -top-4 -left-4 glass-card px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2 border animate-bounce">
+                            <span class="text-xl">👟</span>
+                            <div>
+                                <p class="text-xs font-bold">Limited Edition</p>
+                                <p class="text-[10px] text-slate-500">Verified Stock</p>
+                            </div>
+                        </div>
+
+                        <div class="absolute -bottom-4 -right-4 glass-card px-4 py-2 rounded-2xl shadow-xl flex items-center gap-2 border">
+                            <span class="text-xl">⚡</span>
+                            <div>
+                                <p class="text-xs font-bold">Express Shipping</p>
+                                <p class="text-[10px] text-emerald-500 font-semibold">All-India Free</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+        
+        <!-- Filter Pills Navigation Container -->
+        <div class="flex items-center justify-between gap-4 mb-8 overflow-x-auto pb-4 scrollbar-none">
+            <div class="flex items-center gap-2 sm:gap-3" id="filterPillsContainer">
+                <!-- Pills generated dynamically -->
+            </div>
+            
+            <!-- Quick Sort Dropdown -->
+            <div class="hidden sm:flex items-center gap-2">
+                <span class="text-xs font-bold text-slate-400 uppercase tracking-wider">Sort:</span>
+                <select id="sortSelect" onchange="applyFiltersAndSort()" class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-amber-500/30 rounded-xl px-3 py-1.5 text-xs font-semibold outline-none cursor-pointer">
+                    <option value="relevance">Relevance</option>
+                    <option value="rating">Top Rated (4.8+)</option>
+                    <option value="price-low">Price: Low to High</option>
+                    <option value="price-high">Price: High to Low</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Section Title -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight" id="sectionHeading">
+                    Vault Sneaker Collection
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 font-medium mt-1">
+                    Interactive 3D Cards • Hover to feel the depth effect
+                </p>
+            </div>
+            <span id="resultsCount" class="text-xs font-bold text-amber-500 bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
+                Showing all items
+            </span>
+        </div>
+
+        <!-- Sneaker Grid Container -->
+        <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <!-- Dynamic 3D Cards Rendered Here -->
+        </div>
+
+        <!-- Empty State Container -->
+        <div id="emptyState" class="hidden text-center py-20">
+            <div class="w-24 h-24 mx-auto rounded-full bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-4xl mb-4 text-slate-400">
+                🔍
+            </div>
+            <h3 class="text-xl font-bold text-slate-800 dark:text-slate-200">No sneakers found matching filter</h3>
+            <p class="text-slate-500 text-sm mt-1">Try clearing your filters or searching for another keyword.</p>
+            <button onclick="resetFilters()" class="mt-4 px-5 py-2.5 bg-amber-500 text-slate-950 font-bold rounded-xl text-xs hover:bg-amber-600 transition-all">
+                Reset All Filters
+            </button>
+        </div>
+    </main>
+
+    <!-- Interactive 3D Sneaker Detail & Size Modal -->
+    <div id="productModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/70 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-2xl rounded-3xl shadow-2xl border border-slate-200 dark:border-amber-500/30 overflow-hidden transform scale-95 transition-transform duration-300 relative" id="modalContainer">
+            <button onclick="closeProductModal()" class="absolute top-4 right-4 z-10 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center hover:bg-amber-500 hover:text-slate-950 transition-all">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2">
+                <!-- Left 3D Interactive Rotating Image View -->
+                <div class="p-8 bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-950 dark:to-slate-900 flex flex-col items-center justify-center relative min-h-[280px]">
+                    <div class="w-48 h-48 sm:w-56 sm:h-56 relative flex items-center justify-center">
+                        <img id="modalImg" src="" alt="Sneaker 3D" class="w-full h-full object-contain rounded-2xl drop-shadow-2xl rotate-3d-continuous">
+                    </div>
+                    <span class="text-[10px] uppercase font-extrabold tracking-widest text-slate-400 mt-6 bg-slate-200 dark:bg-slate-800 px-3 py-1 rounded-full">
+                        3D Interactive View Active
+                    </span>
+                </div>
+
+                <!-- Right Size Options & Details -->
+                <div class="p-6 sm:p-8 flex flex-col justify-between space-y-6">
+                    <div>
+                        <div class="flex items-center justify-between">
+                            <span id="modalCategory" class="text-xs font-bold text-amber-500 uppercase tracking-wider">CATEGORY</span>
+                            <span id="modalRating" class="text-xs font-bold text-amber-500 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/30">
+                                ★ 4.9
+                            </span>
+                        </div>
+                        <h3 id="modalTitle" class="text-2xl font-black text-slate-900 dark:text-white mt-1">Sneaker Title</h3>
+                        <p id="modalDesc" class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Description here.</p>
+                        
+                        <!-- Size Selection -->
+                        <div class="mt-6 space-y-3">
+                            <h4 class="text-xs font-bold text-slate-400 uppercase tracking-wider">Select Size:</h4>
+                            <div class="grid grid-cols-4 gap-2" id="sizeOptions">
+                                <button class="size-btn py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-800 text-white hover:border-amber-500 transition-all" onclick="selectSize(this, '7')">7</button>
+                                <button class="size-btn py-2 text-xs font-bold rounded-xl border border-amber-500 bg-amber-500 text-slate-950 transition-all" onclick="selectSize(this, '8')">8</button>
+                                <button class="size-btn py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-800 text-white hover:border-amber-500 transition-all" onclick="selectSize(this, '9')">9</button>
+                                <button class="size-btn py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-800 text-white hover:border-amber-500 transition-all" onclick="selectSize(this, '10')">10</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Price (INR)</p>
+                            <span id="modalPrice" class="text-2xl font-black text-amber-500">₹0</span>
+                        </div>
+                        <button id="modalAddToCartBtn" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-6 py-3 rounded-2xl shadow-lg shadow-amber-500/30 text-sm hover:scale-105 active:scale-95 transition-all">
+                            Add To Bag
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide-Out Shopping Bag Drawer -->
+    <div id="cartDrawer" class="fixed inset-0 z-50 pointer-events-none">
+        <div id="cartOverlay" onclick="toggleCartDrawer()" class="absolute inset-0 bg-slate-950/60 backdrop-blur-sm opacity-0 transition-opacity duration-300"></div>
+
+        <div id="cartContent" class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white dark:bg-slate-900 shadow-2xl border-l border-slate-200 dark:border-slate-800 transform translate-x-full transition-transform duration-300 ease-in-out flex flex-col justify-between pointer-events-auto">
+            
+            <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-500 flex items-center justify-center text-lg">
+                        <i class="fa-solid fa-bag-shopping"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-extrabold text-slate-900 dark:text-white text-lg">Your UBROYAL Bag</h3>
+                        <p id="cartItemsSubtitle" class="text-xs text-slate-500 font-medium">0 Items Selected</p>
+                    </div>
+                </div>
+                <button onclick="toggleCartDrawer()" class="w-9 h-9 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 flex items-center justify-center hover:bg-slate-200 dark:hover:bg-slate-700 transition-all">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div id="cartItemsList" class="flex-1 overflow-y-auto p-6 space-y-4">
+                <!-- Cart items rendered dynamically -->
+            </div>
+
+            <div class="p-6 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-950/50 space-y-4">
+                <!-- Coupon Row -->
+                <div class="flex gap-2">
+                    <input type="text" id="couponInput" placeholder="Enter Coupon (e.g. UBROYAL500)" class="flex-1 px-3 py-2 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs font-bold uppercase outline-none focus:ring-1 focus:ring-amber-500">
+                    <button onclick="applyCoupon()" class="px-4 py-2 bg-slate-800 dark:bg-slate-700 text-white font-bold text-xs rounded-xl hover:bg-slate-900 transition-all">
+                        Apply
+                    </button>
+                </div>
+                <div id="couponStatusMsg" class="text-[11px] font-semibold hidden"></div>
+
+                <div class="space-y-2 text-xs">
+                    <div class="flex justify-between text-slate-500">
+                        <span>Subtotal</span>
+                        <span id="subtotalPrice" class="font-bold text-slate-700 dark:text-slate-300">₹0</span>
+                    </div>
+                    <div class="flex justify-between text-slate-500">
+                        <span>Express Shipping (All India)</span>
+                        <span class="font-bold text-emerald-500">FREE</span>
+                    </div>
+                    <div id="discountRow" class="flex justify-between text-emerald-500 hidden font-bold">
+                        <span>Discount Coupon</span>
+                        <span id="discountPrice">-₹0</span>
+                    </div>
+                    <div class="flex justify-between text-slate-900 dark:text-white text-base font-black pt-2 border-t border-slate-200 dark:border-slate-800">
+                        <span>Total Payable</span>
+                        <span id="totalPayablePrice" class="text-amber-500">₹0</span>
+                    </div>
+                </div>
+
+                <button onclick="processCheckout()" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-purple-600 text-slate-950 font-extrabold shadow-lg shadow-amber-500/30 flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    <span>Checkout Order & Track</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Live Order Tracking Modal -->
+    <div id="trackingModal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="bg-white dark:bg-slate-900 w-full max-w-lg rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 overflow-hidden p-6 sm:p-8 space-y-6 relative">
+            
+            <div class="text-center space-y-2">
+                <div class="w-16 h-16 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-500 flex items-center justify-center text-2xl mx-auto shadow-inner">
+                    <i class="fa-solid fa-circle-check animate-bounce"></i>
+                </div>
+                <h3 class="text-2xl font-black text-slate-900 dark:text-white">Order Confirmed!</h3>
+                <p class="text-xs text-slate-500">Order ID: <span class="font-bold text-slate-700 dark:text-slate-300" id="orderIdText">#UBR-8942</span></p>
+            </div>
+
+            <!-- Timeline -->
+            <div class="space-y-6 relative before:absolute before:left-4 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-slate-800">
+                <div class="flex items-start gap-4 relative z-10">
+                    <div class="w-8 h-8 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold shadow-md">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Order Verified</h4>
+                        <p class="text-xs text-slate-400">Vault has recorded your purchase successfully.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4 relative z-10">
+                    <div class="w-8 h-8 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center text-xs font-bold shadow-md animate-pulse">
+                        <i class="fa-solid fa-box"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Packing Sneakers</h4>
+                        <p class="text-xs text-slate-400">Inspecting quality and packing in luxury vault box.</p>
+                    </div>
+                </div>
+
+                <div class="flex items-start gap-4 relative z-10 opacity-50">
+                    <div class="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500 flex items-center justify-center text-xs font-bold">
+                        <i class="fa-solid fa-truck"></i>
+                    </div>
+                    <div>
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">Express Delivery</h4>
+                        <p class="text-xs text-slate-400">Dispatched via air courier across India.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="closeTrackingModal()" class="w-full py-3 bg-slate-900 dark:bg-slate-100 dark:text-slate-900 text-white font-bold rounded-2xl text-xs hover:opacity-90 transition-all">
+                Done & Close
+            </button>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="border-t border-slate-200 dark:border-slate-800 pt-16 pb-8 px-8 bg-white dark:bg-slate-950 transition-colors">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-4xl font-black italic mb-6 bg-gradient-to-r from-amber-400 to-purple-500 bg-clip-text text-transparent">UBROYAL</div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-10 text-xs text-slate-500 dark:text-slate-400">
+                <div>
+                    <h4 class="text-slate-900 dark:text-white font-bold mb-3">About UBROYAL Vault</h4>
+                    <p class="leading-relaxed">Exclusive 3D sneaker destination bringing the highest quality high-tops, retro runners, and basketball kicks directly to sneakerheads.</p>
+                </div>
+                <div>
+                    <h4 class="text-slate-900 dark:text-white font-bold mb-3">Customer Support</h4>
+                    <p>India Express Shipping | Size Replacement | Verified Quality</p>
+                </div>
+                <div>
+                    <h4 class="text-slate-900 dark:text-white font-bold mb-3">Follow Us</h4>
+                    <a href="https://www.instagram.com/iamubroyal?vrfl=MTRzaDhrdzVyZno2bg==" target="_blank" title="Instagram Profile" class="w-10 h-10 rounded-full bg-gradient-to-tr from-amber-500 to-pink-500 text-slate-950 inline-flex items-center justify-center text-lg hover:scale-110 transition-transform shadow-lg shadow-amber-500/20">
+                        <i class="fa-brands fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+
+            <div class="w-full h-px bg-slate-200 dark:bg-slate-800 my-6"></div>
+
+            <div class="flex flex-wrap gap-4 text-xs text-slate-600 dark:text-slate-300">
+                <span class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-full">Owner: <strong>Sudhanshu Kumar</strong></span>
+                <span class="bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 px-3 py-1 rounded-full">Made by: <strong>Ubroyal Sinha</strong></span>
+            </div>
+
+            <p class="text-slate-400 text-xs mt-6">
+                © 2026 UBROYAL Sneaker Vault Ltd. All rights reserved. | Owner - Sudhanshu Kumar | Made by - Ubroyal Sinha
+            </p>
+        </div>
+    </footer>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const mockSneakers = [
+            {
+                id: 1,
+                title: "UBROYAL Cyber High-Top X",
+                category: "hightop",
+                price: 15999,
+                rating: 4.9,
+                reviews: 412,
+                tag: "High-Top",
+                img: "https://images.unsplash.com/photo-1552346154-21d32810aba3?auto=format&fit=crop&w=800&q=80",
+                desc: "Futuristic ankle-support high-top sneaker with metallic finishing and air cushioning."
+            },
+            {
+                id: 2,
+                title: "UBROYAL Crimson OG Air Grail",
+                category: "retro",
+                price: 14999,
+                rating: 4.9,
+                reviews: 890,
+                tag: "Retro",
+                img: "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80",
+                desc: "Legendary red-and-black retro design crafted with genuine leather panels."
+            },
+            {
+                id: 3,
+                title: "UBROYAL Minimalist White Low-Top",
+                category: "lowtop",
+                price: 9999,
+                rating: 4.8,
+                reviews: 320,
+                tag: "Low-Top",
+                img: "https://images.unsplash.com/photo-1600185365483-26d7a4cc7519?auto=format&fit=crop&w=800&q=80",
+                desc: "Clean, everyday wearable low-top sneaker matching all formal and casual fits."
+            },
+            {
+                id: 4,
+                title: "UBROYAL Court Pro Basketball Kicks",
+                category: "basketball",
+                price: 16999,
+                rating: 4.9,
+                reviews: 215,
+                tag: "Basketball",
+                img: "https://images.unsplash.com/photo-1579338559194-a162d19bf842?auto=format&fit=crop&w=800&q=80",
+                desc: "High-traction rubber sole basketball sneakers built for explosive court performance."
+            },
+            {
+                id: 5,
+                title: "UBROYAL Velocity Air Runner",
+                category: "runner",
+                price: 11999,
+                rating: 4.8,
+                reviews: 310,
+                tag: "Runner",
+                img: "https://images.unsplash.com/photo-1511556532299-8f662fc26c06?auto=format&fit=crop&w=800&q=80",
+                desc: "Ultra-breathable lightweight running shoe with maximum energy bounce cushion."
+            },
+            {
+                id: 6,
+                title: "UBROYAL Stealth Black High-Top",
+                category: "hightop",
+                price: 13999,
+                rating: 4.9,
+                reviews: 285,
+                tag: "High-Top",
+                img: "https://images.unsplash.com/photo-1549298916-b41d501d3772?auto=format&fit=crop&w=800&q=80",
+                desc: "Matte black tactical high-top sneaker engineered with premium finish and ultra durability."
+            }
+        ];
+
+        const categories = [
+            { id: "all", label: "All Vault Drops" },
+            { id: "hightop", label: "High-Top Kicks" },
+            { id: "lowtop", label: "Low-Top Classics" },
+            { id: "retro", label: "Retro Series" },
+            { id: "basketball", label: "Basketball" },
+            { id: "runner", label: "Runners" }
+        ];
+
+        let selectedCategory = "all";
+        let searchQuery = "";
+        let selectedSize = "8";
+        let cart = [];
+        let discountPercent = 0;
+        let activeModalItem = null;
+
+        document.addEventListener("DOMContentLoaded", () => {
+            renderCategoryPills();
+            renderProducts();
+            updateCartUI();
+        });
+
+        function toggleTheme() {
+            const html = document.documentElement;
+            html.classList.toggle('dark');
+        }
+
+        function renderCategoryPills() {
+            const container = document.getElementById("filterPillsContainer");
+            container.innerHTML = categories.map(cat => {
+                const isActive = cat.id === selectedCategory;
+                return `
+                    <button onclick="filterCategory('${cat.id}')" 
+                        class="px-5 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-all ${
+                            isActive 
+                            ? 'bg-amber-500 text-slate-950 font-black shadow-lg shadow-amber-500/30' 
+                            : 'bg-white dark:bg-slate-900 border border-slate-200 dark:border-amber-500/30 text-slate-600 dark:text-slate-300 hover:border-amber-500'
+                        }">
+                        ${cat.label}
+                    </button>
+                `;
+            }).join("");
+        }
+
+        function filterCategory(catId) {
+            selectedCategory = catId;
+            renderCategoryPills();
+            applyFiltersAndSort();
+        }
+
+        function handleSearch(val) {
+            searchQuery = val.toLowerCase().trim();
+            applyFiltersAndSort();
+        }
+
+        function applyFiltersAndSort() {
+            let filtered = mockSneakers.filter(item => {
+                const matchesCat = selectedCategory === "all" || item.category === selectedCategory;
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery) || item.desc.toLowerCase().includes(searchQuery);
+                return matchesCat && matchesSearch;
+            });
+
+            const sortBy = document.getElementById("sortSelect").value;
+            if (sortBy === "rating") {
+                filtered.sort((a, b) => b.rating - a.rating);
+            } else if (sortBy === "price-low") {
+                filtered.sort((a, b) => a.price - b.price);
+            } else if (sortBy === "price-high") {
+                filtered.sort((a, b) => b.price - a.price);
+            }
+
+            renderProducts(filtered);
+        }
+
+        function renderProducts(itemsToRender = mockSneakers) {
+            const grid = document.getElementById("productGrid");
+            const emptyState = document.getElementById("emptyState");
+            const countText = document.getElementById("resultsCount");
+
+            countText.innerText = `Showing ${itemsToRender.length} item(s)`;
+
+            if (itemsToRender.length === 0) {
+                grid.innerHTML = "";
+                emptyState.classList.remove("hidden");
+                return;
+            }
+
+            emptyState.classList.add("hidden");
+            grid.innerHTML = itemsToRender.map(item => `
+                <div class="glass-card rounded-3xl p-5 flex flex-col justify-between group shadow-lg hover:shadow-2xl transition-all duration-300 hover:-translate-y-1.5">
+                    <div class="relative w-full h-48 flex items-center justify-center overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-950">
+                        <span class="absolute top-3 left-3 bg-white/90 dark:bg-slate-900 border border-slate-200 dark:border-amber-500/30 text-amber-500 font-bold text-[10px] px-2.5 py-1 rounded-full uppercase shadow-sm">
+                            ${item.tag}
+                        </span>
+                        <img src="${item.img}" alt="${item.title}" class="w-full h-40 object-contain transition-transform duration-500 group-hover:scale-110 drop-shadow-xl">
+                    </div>
+
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-xs">
+                            <span class="text-amber-500 font-bold">★ ${item.rating} (${item.reviews})</span>
+                            <span class="text-slate-400 font-medium text-[10px]">Vault Verified</span>
+                        </div>
+                        <h3 class="font-extrabold text-slate-900 dark:text-white text-sm line-clamp-1">${item.title}</h3>
+                        <p class="text-slate-500 dark:text-slate-400 text-xs line-clamp-2">${item.desc}</p>
+                    </div>
+
+                    <div class="mt-5 pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] text-slate-400 font-bold block uppercase">Price</span>
+                            <span class="text-lg font-black text-amber-500">₹${item.price.toLocaleString("en-IN")}</span>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="openProductModal(${item.id})" class="bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 font-bold px-3 py-2 rounded-xl text-xs transition-all">
+                                3D View
+                            </button>
+                            <button onclick="addToCartById(${item.id})" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black px-4 py-2 rounded-xl text-xs shadow-md transition-all">
+                                Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function openProductModal(id) {
+            const item = mockSneakers.find(s => s.id === id);
+            if (!item) return;
+            activeModalItem = item;
+
+            document.getElementById("modalImg").src = item.img;
+            document.getElementById("modalTitle").innerText = item.title;
+            document.getElementById("modalCategory").innerText = item.tag;
+            document.getElementById("modalRating").innerText = `★ ${item.rating} (${item.reviews} reviews)`;
+            document.getElementById("modalDesc").innerText = item.desc;
+            document.getElementById("modalPrice").innerText = `₹${item.price.toLocaleString("en-IN")}`;
+
+            document.getElementById("modalAddToCartBtn").onclick = () => {
+                addToCart(item, selectedSize);
+                closeProductModal();
+                toggleCartDrawer();
+            };
+
+            const modal = document.getElementById("productModal");
+            const container = document.getElementById("modalContainer");
+            modal.classList.remove("pointer-events-none", "opacity-0");
+            modal.classList.add("opacity-100");
+            container.classList.remove("scale-95");
+            container.classList.add("scale-100");
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById("productModal");
+            const container = document.getElementById("modalContainer");
+            modal.classList.add("pointer-events-none", "opacity-0");
+            modal.classList.remove("opacity-100");
+            container.classList.add("scale-95");
+            container.classList.remove("scale-100");
+        }
+
+        function selectSize(btn, size) {
+            document.querySelectorAll(".size-btn").forEach(b => {
+                b.className = "size-btn py-2 text-xs font-bold rounded-xl border border-slate-700 bg-slate-800 text-white hover:border-amber-500 transition-all";
+            });
+            btn.className = "size-btn py-2 text-xs font-bold rounded-xl border border-amber-500 bg-amber-500 text-slate-950 transition-all";
+            selectedSize = size;
+        }
+
+        function addToCartById(id) {
+            const item = mockSneakers.find(s => s.id === id);
+            if (item) {
+                addToCart(item, "8");
+                toggleCartDrawer();
+            }
+        }
+
+        function addToCart(item, size) {
+            const existing = cart.find(c => c.id === item.id && c.size === size);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...item, size, qty: 1 });
+            }
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const list = document.getElementById("cartItemsList");
+            const badge = document.getElementById("cartCountBadge");
+            const subtotalEl = document.getElementById("subtotalPrice");
+            const totalEl = document.getElementById("totalPayablePrice");
+            const subtitle = document.getElementById("cartItemsSubtitle");
+            const discountRow = document.getElementById("discountRow");
+            const discountPriceEl = document.getElementById("discountPrice");
+
+            const totalQty = cart.reduce((acc, c) => acc + c.qty, 0);
+            badge.innerText = totalQty;
+            subtitle.innerText = `${totalQty} Item(s) Selected`;
+
+            if (cart.length === 0) {
+                list.innerHTML = `
+                    <div class="text-center py-12 text-slate-400 space-y-2">
+                        <i class="fa-solid fa-bag-shopping text-4xl text-slate-600 mb-2"></i>
+                        <p class="text-sm font-bold">Your bag is empty</p>
+                    </div>
+                `;
+                subtotalEl.innerText = "₹0";
+                totalEl.innerText = "₹0";
+                discountRow.classList.add("hidden");
+                return;
+            }
+
+            const subtotal = cart.reduce((acc, c) => acc + (c.price * c.qty), 0);
+            subtotalEl.innerText = `₹${subtotal.toLocaleString("en-IN")}`;
+
+            let discountAmount = 0;
+            if (discountPercent > 0) {
+                discountAmount = Math.round((subtotal * discountPercent) / 100);
+                discountRow.classList.remove("hidden");
+                discountPriceEl.innerText = `-₹${discountAmount.toLocaleString("en-IN")}`;
+            } else {
+                discountRow.classList.add("hidden");
+            }
+
+            const grandTotal = Math.max(0, subtotal - discountAmount);
+            totalEl.innerText = `₹${grandTotal.toLocaleString("en-IN")}`;
+
+            list.innerHTML = cart.map((c, index) => `
+                <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 p-3 rounded-2xl">
+                    <img src="${c.img}" class="w-16 h-16 object-contain bg-white dark:bg-slate-900 rounded-xl p-1 shadow-sm">
+                    <div class="flex-1 min-w-0">
+                        <h4 class="text-xs font-bold text-slate-900 dark:text-white truncate">${c.title}</h4>
+                        <p class="text-[10px] text-amber-500 font-semibold">Size: ${c.size}</p>
+                        <p class="text-xs font-black text-slate-700 dark:text-slate-200 mt-1">₹${c.price.toLocaleString("en-IN")}</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="changeQty(${index}, -1)" class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white flex items-center justify-center text-xs font-bold">-</button>
+                        <span class="text-xs font-bold">${c.qty}</span>
+                        <button onclick="changeQty(${index}, 1)" class="w-6 h-6 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-white flex items-center justify-center text-xs font-bold">+</button>
+                    </div>
+                </div>
+            `).join("");
+        }
+
+        function changeQty(index, delta) {
+            cart[index].qty += delta;
+            if (cart[index].qty <= 0) cart.splice(index, 1);
+            updateCartUI();
+        }
+
+        function applyCoupon() {
+            const code = document.getElementById("couponInput").value.trim().toUpperCase();
+            const msg = document.getElementById("couponStatusMsg");
+            msg.classList.remove("hidden");
+
+            if (code === "UBROYAL500" || code === "MEDEV50") {
+                discountPercent = 10;
+                msg.className = "text-[11px] font-semibold text-emerald-500";
+                msg.innerText = "Coupon applied successfully! (10% OFF)";
+                updateCartUI();
+            } else {
+                discountPercent = 0;
+                msg.className = "text-[11px] font-semibold text-red-500";
+                msg.innerText = "Invalid coupon code. Try UBROYAL500";
+                updateCartUI();
+            }
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById("cartDrawer");
+            const overlay = document.getElementById("cartOverlay");
+            const content = document.getElementById("cartContent");
+
+            const isOpen = !content.classList.contains("translate-x-full");
+
+            if (isOpen) {
+                content.classList.add("translate-x-full");
+                overlay.classList.add("opacity-0");
+                setTimeout(() => drawer.classList.add("pointer-events-none"), 300);
+            } else {
+                drawer.classList.remove("pointer-events-none");
+                overlay.classList.remove("opacity-0");
+                content.classList.remove("translate-x-full");
+            }
+        }
+
+        function processCheckout() {
+            if (cart.length === 0) return;
+            toggleCartDrawer();
+            cart = [];
+            updateCartUI();
+
+            const trackingModal = document.getElementById("trackingModal");
+            document.getElementById("orderIdText").innerText = `#UBR-${Math.floor(1000 + Math.random() * 9000)}`;
+            trackingModal.classList.remove("pointer-events-none", "opacity-0");
+            trackingModal.classList.add("opacity-100");
+        }
+
+        function closeTrackingModal() {
+            const trackingModal = document.getElementById("trackingModal");
+            trackingModal.classList.add("pointer-events-none", "opacity-0");
+            trackingModal.classList.remove("opacity-100");
+        }
+
+        function resetFilters() {
+            selectedCategory = "all";
+            searchQuery = "";
+            document.getElementById("searchInput").value = "";
+            renderCategoryPills();
+            applyFiltersAndSort();
+        }
+    </script>
+</body>
+</html>
